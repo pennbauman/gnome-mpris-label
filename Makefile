@@ -1,4 +1,4 @@
-UUID = mprisLabel@moon-0xff.github.com
+UUID = mpris-label@pennbauman.github.com
 ZIP_FILE = $(UUID).shell-extension.zip
 BUILD_DIR = build
 

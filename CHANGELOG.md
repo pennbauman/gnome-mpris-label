@@ -94,3 +94,7 @@ Note: The unlisted version 26 for GNOME 45 users already included the `Identity`
 
 Note: In interim versions, the problems with the selection menu were fixed for
 GNOME 47, but introduced as a bug in GNOME 45/46.
+
+# Version 39
+- Unifies version number for all GNOME versions
+- Switches to mpris-label@pennbauman.github.com
