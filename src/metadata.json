@@ -3,7 +3,7 @@
 	"name": "MPRIS Media Label",
 	"description": "Display a label with song/album/artist information for MPRIS compatible players",
 	"version": 39,
-	"shell-version": [ "47", "48" ],
+	"shell-version": [ "45", "46" ],
 	"url": "https://github.com/pennbauman/gnome-mpris-label",
 	"settings-schema": "org.gnome.shell.extensions.mpris-label"
 }

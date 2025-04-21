@@ -1,15 +1,11 @@
-import Adw from 'gi://Adw';
-import Gio from 'gi://Gio';
-import Gtk from 'gi://Gtk';
-import Gdk from 'gi://Gdk';
+const {Adw,Gio,Gtk,Gdk} = imports.gi;
 
-import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+const ExtensionUtils = imports.misc.extensionUtils;
 
 function init(){}
 
-export default class MprisLabelPreferences extends ExtensionPreferences {
-fillPreferencesWindow(window){
-	const settings = this.getSettings();
+function fillPreferencesWindow(window){
+	let settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.mpris-label');
 	window.default_height = 960;
 
 //panel page:
@@ -141,7 +137,6 @@ fillPreferencesWindow(window){
 
 	[doubleClickTime, doubleClickLabel, leftDoubleClickDropDown, middleDoubleClickDropDown, rightDoubleClickDropDown, thumbDoubleForwardDropDown, thumbDoubleBackwardDropDown]
 		.forEach(el => bindEnabled(settings, 'enable-double-clicks', el));
-}
 }
 
 // Adwaita "design" and "structure" functions
@@ -398,7 +393,7 @@ function buildActionRow(labelstring,labeltooltip){
 function buildInfoButton(labeltooltip){
 	let thisInfoButton = new Gtk.MenuButton({
 		valign: Gtk.Align.CENTER,
-		icon_name: 'dialog-information-symbolic',
+		icon_name: 'info-symbolic',
 		visible: true
 	});
 	thisInfoButton.add_css_class('flat');
