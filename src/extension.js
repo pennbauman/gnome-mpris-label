@@ -6,7 +6,6 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import St from 'gi://St';
-import Cogl from 'gi://Cogl';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Volume from 'resource:///org/gnome/shell/ui/status/volume.js';
 
@@ -108,12 +107,7 @@ class MprisLabel extends PanelMenu.Button {
 			new_channels.push(Math.round((channel[0] + channel[1]) / 2));
 		});
 
-		let mixedColor = new Cogl.Color({
-			red: new_channels[0],
-			green: new_channels[1],
-			blue: new_channels[2],
-			alpha: new_channels[3]
-		});
+		let mixedColor = Clutter.Color.new(new_channels[0],new_channels[1],new_channels[2],new_channels[3]);
 		let color_str = mixedColor.to_string();
 		this.unfocusColor = color_str.substring(0,7); //ignore alpha channel
 	}
