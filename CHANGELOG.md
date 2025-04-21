@@ -1,5 +1,5 @@
 # Version 3
-- Adds support for GNOME 42 and 43
+- Removes support for GNOME versions above 44
 
 # Version 4
 Adds 3 new options:
@@ -94,3 +94,6 @@ Note: The unlisted version 26 for GNOME 45 users already included the `Identity`
 
 Note: In interim versions, the problems with the selection menu were fixed for
 GNOME 47, but introduced as a bug in GNOME 45/46.
+
+# Version 39
+- Removes support for GNOME versions above 44
