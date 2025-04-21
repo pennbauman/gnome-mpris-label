@@ -1,0 +1,154 @@
+--- a/src/extension.js
++++ b/src/extension.js
+@@ -1,30 +1,24 @@
+-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+-import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+-import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+-import Clutter from 'gi://Clutter';
+-import Gio from 'gi://Gio';
+-import GLib from 'gi://GLib';
+-import GObject from 'gi://GObject';
+-import St from 'gi://St';
+-import Cogl from 'gi://Cogl';
+-import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+-import * as Volume from 'resource:///org/gnome/shell/ui/status/volume.js';
+-
+-import {Players} from './players.js';
+-import {buildLabel} from './label.js';
++const Main = imports.ui.main;
++const PanelMenu = imports.ui.panelMenu;
++const PopupMenu = imports.ui.popupMenu;
++const {Clutter,Gio,GLib,GObject,St} = imports.gi;
++const ExtensionUtils = imports.misc.extensionUtils;
++const CurrentExtension = ExtensionUtils.getCurrentExtension();
++const Volume = imports.ui.status.volume;
++
++const { Players } = CurrentExtension.imports.players;
++const { buildLabel } = CurrentExtension.imports.label;
+ 
+ let indicator = null;
+ 
+-export default class MprisLabelExtension extends Extension {
+-	enable(){
+-		indicator = new MprisLabel(this.getSettings());
+-	}
++function enable(){
++	indicator = new MprisLabel(ExtensionUtils.getSettings());
++}
+ 
+-	disable(){
+-		indicator._disable();
+-		indicator.destroy();
+-		indicator = null;
+-	}
++function disable(){
++	indicator._disable();
++	indicator.destroy();
++	indicator = null;
+ }
+ 
+ var MprisLabel = GObject.registerClass(
+@@ -108,12 +102,7 @@ class MprisLabel extends PanelMenu.Button {
+ 			new_channels.push(Math.round((channel[0] + channel[1]) / 2));
+ 		});
+ 
+-		let mixedColor = new Cogl.Color({
+-			red: new_channels[0],
+-			green: new_channels[1],
+-			blue: new_channels[2],
+-			alpha: new_channels[3]
+-		});
++		let mixedColor = Clutter.Color.new(new_channels[0],new_channels[1],new_channels[2],new_channels[3]);
+ 		let color_str = mixedColor.to_string();
+ 		this.unfocusColor = color_str.substring(0,7); //ignore alpha channel
+ 	}
+@@ -441,7 +430,7 @@ class MprisLabel extends PanelMenu.Button {
+ 	//settings shortcut:
+ 		let settingsMenuItem = new PopupMenu.PopupMenuItem('Settings');
+ 		settingsMenuItem.setOrnament(PopupMenu.Ornament.NONE); //to force item horizontal alignment
+-		settingsMenuItem.connect('activate', () => Extension.lookupByUUID('mprisLabel@moon-0xff.github.com').openPreferences());
++		settingsMenuItem.connect('activate', () => ExtensionUtils.openPrefs() );
+ 		this.menu.addMenuItem(settingsMenuItem);
+ 	}
+ 
+--- a/src/label.js
++++ b/src/label.js
+@@ -1,4 +1,4 @@
+-export var buildLabel = function buildLabel(players,settings){
++var buildLabel = function buildLabel(players,settings){
+ 	const MAX_STRING_LENGTH = settings.get_int('max-string-length');
+ 	const BUTTON_PLACEHOLDER = settings.get_string('button-placeholder');
+ 	const LABEL_FILTERED_LIST = settings.get_string('label-filtered-list');
+--- a/src/metadata.json
++++ b/src/metadata.json
+@@ -1,9 +1,9 @@
+ {
+ 	"uuid": "mprisLabel@moon-0xff.github.com",
+ 	"name": "Media Label and Controls (Mpris Label)",
+ 	"description": "Display a label in your panel with the song/title/album/artist information available from an mpris compatible player. You can also control the player, raise/lower its volume, customize the label, and a lot more! This extension works with Spotify, Vlc, Rhythmbox, Firefox, Chromium, and (probably) any MPRIS compatible player.",
+-	"version": 37,
+-	"shell-version": [ "47" ],
++	"version": 34,
++	"shell-version": [ "43", "44" ],
+ 	"url": "https://github.com/Moon-0xff/gnome-mpris-label",
+ 	"settings-schema": "org.gnome.shell.extensions.mpris-label"
+ }
+--- a/src/players.js
++++ b/src/players.js
+@@ -1,6 +1,4 @@
+-import Gio from 'gi://Gio';
+-import Shell from 'gi://Shell';
+-import St from 'gi://St';
++const {Gio,Shell,St} = imports.gi;
+ 
+ const mprisInterface = `
+ <node>
+@@ -42,7 +40,7 @@ const dBusInterface = `
+ 	</interface>
+ </node>`
+ 
+-export var Players = class Players {
++var Players = class Players {
+ 	constructor(settings){
+ 		this.list = [];
+ 		this.activePlayers= [];
+deleted file mode 100644
+--- a/src/prefs.js
++++ b/src/prefs.js
+@@ -1,15 +1,11 @@
+-import Adw from 'gi://Adw';
+-import Gio from 'gi://Gio';
+-import Gtk from 'gi://Gtk';
+-import Gdk from 'gi://Gdk';
++const {Adw,Gio,Gtk,Gdk} = imports.gi;
+ 
+-import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
++const ExtensionUtils = imports.misc.extensionUtils;
+ 
+ function init(){}
+ 
+-export default class MprisLabelPreferences extends ExtensionPreferences {
+-fillPreferencesWindow(window){
+-	const settings = this.getSettings();
++function fillPreferencesWindow(window){
++	let settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.mpris-label');
+ 	window.default_height = 960;
+ 
+ //panel page:
+@@ -142,7 +138,6 @@ fillPreferencesWindow(window){
+ 	[doubleClickTime, doubleClickLabel, leftDoubleClickDropDown, middleDoubleClickDropDown, rightDoubleClickDropDown, thumbDoubleForwardDropDown, thumbDoubleBackwardDropDown]
+ 		.forEach(el => bindEnabled(settings, 'enable-double-clicks', el));
+ }
+-}
+ 
+ // Adwaita "design" and "structure" functions
+ 
+@@ -398,7 +393,7 @@ function buildActionRow(labelstring,labeltooltip){
+ function buildInfoButton(labeltooltip){
+ 	let thisInfoButton = new Gtk.MenuButton({
+ 		valign: Gtk.Align.CENTER,
+-		icon_name: 'dialog-information-symbolic',
++		icon_name: 'info-symbolic',
+ 		visible: true
+ 	});
+ 	thisInfoButton.add_css_class('flat');
